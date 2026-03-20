@@ -1,0 +1,43 @@
+/* Container for the thumbnail — needs position:relative for the button to anchor to */
+ytd-rich-item-renderer {
+  position: relative;
+}
+
+.yt-unsub-btn {
+  position: absolute;
+  bottom: 8px;
+  left: 8px;
+  z-index: 100;
+
+  /* Hide until the card is hovered */
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.15s ease;
+
+  padding: 4px 10px;
+  border: none;
+  border-radius: 4px;
+  background: rgba(200, 0, 0, 0.85);
+  color: #fff;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+/* Reveal on card hover */
+ytd-rich-item-renderer:hover .yt-unsub-btn {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* Hover effect on the button itself */
+.yt-unsub-btn:hover {
+  background: rgba(200, 0, 0, 1);
+}
+
+/* After successful unsubscribe, dim the whole card */
+ytd-rich-item-renderer.yt-unsub-done {
+  opacity: 0.3;
+  transition: opacity 0.4s ease;
+}

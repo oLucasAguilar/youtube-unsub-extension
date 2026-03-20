@@ -1,0 +1,19 @@
+{
+  "manifest_version": 3,
+  "name": "YouTube Quick Unsubscribe",
+  "version": "1.0.0",
+  "description": "Overlay an Unsubscribe button on YouTube home feed video cards",
+  "permissions": ["cookies", "scripting"],
+  "host_permissions": ["https://www.youtube.com/*"],
+  "content_scripts": [
+    {
+      "matches": ["https://www.youtube.com/*"],
+      "js": ["content.js"],
+      "css": ["styles.css"],
+      "run_at": "document_idle"
+    }
+  ],
+  "background": {
+    "service_worker": "background.js"
+  }
+}
