@@ -65,6 +65,25 @@
     if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
   }
 
+  async function fetchChannelIdFromPage(url) {
+    const resp = await fetch(url, { credentials: 'include' });
+    if (!resp.ok) throw new Error(`page fetch HTTP ${resp.status}`);
+    const html = await resp.text();
+    const match = html.match(/"externalId":"([\w-]+)"/);
+    if (match) return match[1];
+    throw new Error(`channel ID not found on page: ${url}`);
+  }
+
+  function findBrowseId(obj, depth = 0) {
+    if (!obj || typeof obj !== 'object' || depth > 8) return null;
+    if (typeof obj.browseId === 'string' && obj.browseId.length > 4) return obj.browseId;
+    for (const val of Object.values(obj)) {
+      const found = findBrowseId(val, depth + 1);
+      if (found) return found;
+    }
+    return null;
+  }
+
   async function resolveHandleToChannelId(handle) {
     const { apiKey, context } = await getYtcfg();
 
@@ -80,9 +99,16 @@
 
     if (!resp.ok) throw new Error(`resolve_url HTTP ${resp.status}`);
     const data = await resp.json();
-    const browseId = data?.endpoint?.browseEndpoint?.browseId || data?.browseEndpoint?.browseId;
-    if (!browseId) throw new Error('browseId not found');
-    return browseId;
+
+    const browseId = findBrowseId(data);
+    if (browseId) return browseId;
+
+    // Legacy custom URLs return urlEndpoint instead of browseEndpoint.
+    // Fall back to fetching the page and parsing the channel ID from HTML.
+    const fallbackUrl = data?.endpoint?.urlEndpoint?.url;
+    if (fallbackUrl) return fetchChannelIdFromPage(fallbackUrl);
+
+    throw new Error('browseId not found');
   }
 
   function getChannelIdFromPolymerData(card) {
